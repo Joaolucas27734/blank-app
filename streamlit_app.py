@@ -20,7 +20,7 @@ load_dotenv()
 
 GITHUB_CLIENT_ID = os.getenv("Ov23liLcLuATTXOnURGD")
 GITHUB_CLIENT_SECRET = os.getenv("8f9baa8319ebdf59fe1d5da0934af669f8e6ed75")
-APP_URL = os.getenv("https://blank-app-w5emah1l7b8.streamlit.app/", "http://localhost:8501")  # must match GitHub app
+APP_URL = os.getenv("https://blank-app-w5emah1l7b8.streamlit.app/")  # must match GitHub app
 
 # OAuth endpoints
 AUTH_URL = "https://github.com/login/oauth/authorize"
