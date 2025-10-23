@@ -1,2 +1,5 @@
 streamlit
-pip install plotly
+plotly
+pandas
+requests
+python-dotenv
