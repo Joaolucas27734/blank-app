@@ -18,8 +18,8 @@ from dotenv import load_dotenv
 # Load environment variables from .env if present
 load_dotenv()
 
-GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")
-GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET")
+GITHUB_CLIENT_ID = os.getenv("Ov23liLcLuATTXOnURGD")
+GITHUB_CLIENT_SECRET = os.getenv("8f9baa8319ebdf59fe1d5da0934af669f8e6ed75")
 APP_URL = os.getenv("APP_URL", "http://localhost:8501")  # must match GitHub app
 
 # OAuth endpoints
