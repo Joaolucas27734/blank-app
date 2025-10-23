@@ -1,32 +1,6 @@
 """
-Streamlit — Reportana-like Dashboard with GitHub OAuth Login
-File: streamlit_reportana_clone_with_github_login.py
-
-INSTRUÇÕES RÁPIDAS (LEIA):
-1) Crie um OAuth App no GitHub: https://github.com/settings/developers -> New OAuth App
-   - Homepage URL: https://your-domain-or-ngrok-url/   (ex: http://localhost:8501 for dev with Streamlit)
-   - Authorization callback URL: https://your-domain-or-ngrok-url/  (same)
-   - Copie CLIENT_ID e CLIENT_SECRET
-
-2) Configure variáveis de ambiente no seu ambiente de execução (ou .env):
-   - GITHUB_CLIENT_ID
-   - GITHUB_CLIENT_SECRET
-   - APP_URL (ex: http://localhost:8501)
-
-3) Requisitos (pip):
-   pip install streamlit requests plotly python-dotenv
-
-4) Execute:
-   streamlit run streamlit_reportana_clone_with_github_login.py
-
-O que o app faz:
-- Autentica o usuário via GitHub OAuth (fluxo de autorização padrão)
-- Mostra um dashboard simplificado (métricas, gráficos) parecido com um "overview"
-- Permite logout (limpa sessão)
-
-Observação técnica:
-- Este é um exemplo didático. Em produção, utilize HTTPS, valide estados de CSRF, e armazene segredos com segurança.
-
+Streamlit — Reportana-like Dashboard with GitHub OAuth Login (Atualizado)
+Substitui st.experimental_get_query_params por st.query_params
 """
 
 import os
@@ -56,7 +30,6 @@ USER_API = "https://api.github.com/user"
 # ---------- Helper functions ----------
 
 def _get_state():
-    # keep a simple nonce to mitigate CSRF; in production use a better store
     if "oauth_state" not in st.session_state:
         st.session_state.oauth_state = str(int(time.time()))
     return st.session_state.oauth_state
@@ -69,7 +42,6 @@ def build_github_auth_url():
         "redirect_uri": APP_URL,
         "scope": "read:user",
         "state": state,
-        # "allow_signup": "false"
     }
     return f"{AUTH_URL}?{urllib.parse.urlencode(params)}"
 
@@ -98,25 +70,22 @@ def fetch_github_user(access_token: str) -> Optional[dict]:
         return None
     return resp.json()
 
-
 # ---------- OAuth flow handling ----------
 
 st.set_page_config(page_title="Reportana Clone — Login GitHub", layout="wide")
 
 # Logout
-if st.experimental_get_query_params().get("logout"):
-    # Clear session and redirect to base url without params
+if st.query_params.get("logout"):
     for k in list(st.session_state.keys()):
         del st.session_state[k]
     st.experimental_set_query_params()
     st.experimental_rerun()
 
 # On first load, check for GitHub callback (code + state)
-qp = st.experimental_get_query_params()
+qp = st.query_params
 if "code" in qp and "state" in qp and "user" not in st.session_state:
     code = qp.get("code")[0]
     state = qp.get("state")[0]
-    # validate state
     if state != _get_state():
         st.error("State mismatch. Possível ataque CSRF.")
     else:
@@ -130,7 +99,6 @@ if "code" in qp and "state" in qp and "user" not in st.session_state:
                 st.error("Não foi possível obter dados do usuário GitHub.")
         else:
             st.error("Falha ao obter token do GitHub.")
-    # Clean query params after processing
     st.experimental_set_query_params()
     st.experimental_rerun()
 
@@ -157,9 +125,7 @@ st.sidebar.markdown(f"[Logout]({APP_URL}?logout=1)")
 st.title("📊 Dashboard — Overview")
 st.markdown("Visão geral das métricas (demo). Este layout é inspirado na página Overview do Reportana.")
 
-# --- Mock / demo data ---
-# In a real app você traria dados de APIs ou banco
-
+# Mock / demo data
 @st.cache_data(ttl=60)
 def load_demo_data():
     dates = pd.date_range(end=pd.Timestamp.today(), periods=30)
@@ -174,7 +140,6 @@ def load_demo_data():
 try:
     df = load_demo_data()
 except Exception:
-    # fallback in case pd.np deprecated
     import numpy as np
     dates = pd.date_range(end=pd.Timestamp.today(), periods=30)
     df = pd.DataFrame({
@@ -230,9 +195,5 @@ st.table(recent)
 st.markdown("---")
 st.markdown("_Este é um protótipo. Para funcionalidades completas (integração multicanal, envio de campanhas, análises profundas), é necessário conectar APIs externas e um banco de dados._")
 
-# Footer / debug (show GitHub profile summary)
 with st.expander("Perfil GitHub (raw)"):
     st.json(user)
-
-
-# End of file
